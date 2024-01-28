@@ -9,6 +9,7 @@ from itertools import product
 
 class LinkedinEasyApply:
     def __init__(self, parameters, driver):
+        print("Initializing LinkedinEasyApply...")
         self.browser = driver
         self.email = parameters['email']
         self.password = parameters['password']
@@ -39,30 +40,36 @@ class LinkedinEasyApply:
 
 
     def login(self):
+        print("Logging in...")
         try:
             self.browser.get("https://www.linkedin.com/login")
-            time.sleep(random.uniform(5, 10))
+            time.sleep(random.uniform(5, 6))
             self.browser.find_element(By.ID, "username").send_keys(self.email)
             self.browser.find_element(By.ID, "password").send_keys(self.password)
             self.browser.find_element(By.CSS_SELECTOR, ".btn__primary--large").click()
-            time.sleep(random.uniform(5, 10))
+            time.sleep(random.uniform(5, 6))
         except TimeoutException:
+            print("Login failed due to timeout.")
             raise Exception("Could not login!")
 
     def security_check(self):
+        print("Performing security check...")
         current_url = self.browser.current_url
         page_source = self.browser.page_source
 
         if '/checkpoint/challenge/' in current_url or 'security check' in page_source:
+            print("Security check detected. Please complete it.")
             input("Please complete the security check and press enter in this console when it is done.")
-            time.sleep(random.uniform(5.5, 10.5))
+            print("Security check completed. Resuming script.")
+            time.sleep(random.uniform(5.5, 6.5))
 
     def start_applying(self):
+        print("Starting job application process...")
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)
 
         page_sleep = 0
-        minimum_time = 60*15
+        minimum_time = 6*1
         minimum_page_time = time.time() + minimum_time
 
         for (position, location) in searches:
@@ -88,11 +95,12 @@ class LinkedinEasyApply:
                         time.sleep(time_left)
                         minimum_page_time = time.time() + minimum_time
                     if page_sleep % 5 == 0:
-                        sleep_time = random.randint(500, 900)
+                        sleep_time = random.randint(5, 6)
                         print("Sleeping for " + str(sleep_time/60) + " minutes.")
                         time.sleep(sleep_time)
                         page_sleep += 1
-            except:
+            except Exception as e:
+                print("Exception occurred: ", e)
                 traceback.print_exc()
                 pass
 
@@ -102,13 +110,14 @@ class LinkedinEasyApply:
                 time.sleep(time_left)
                 minimum_page_time = time.time() + minimum_time
             if page_sleep % 5 == 0:
-                sleep_time = random.randint(500, 900)
+                sleep_time = random.randint(5, 6)
                 print("Sleeping for " + str(sleep_time/60) + " minutes.")
                 time.sleep(sleep_time)
                 page_sleep += 1
 
 
     def apply_jobs(self, location):
+        print(f"Applying for jobs in {location}...")
         no_jobs_text = ""
         try:
             no_jobs_element = self.browser.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
@@ -116,18 +125,22 @@ class LinkedinEasyApply:
         except:
             pass
         if 'No matching jobs found' in no_jobs_text:
+            print("No matching jobs found in the location.")
             raise Exception("No more jobs on this page")
 
-        if 'unfortunately, things aren' in self.browser.page_source.lower():
+        if 'unfortunately, things aren' in self.browser.page_source.lower():  # noqa
+            print("Encountered a generic error message on the page.")
             raise Exception("No more jobs on this page")
 
         try:
             job_results = self.browser.find_element(By.CLASS_NAME, "jobs-search-results-list")
+            print("Found job results list, starting to scroll...")
             self.scroll_slow(job_results)
             self.scroll_slow(job_results, step=300, reverse=True)
 
             job_list = self.browser.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
             if len(job_list) == 0:
+                print("No job list elements found after scrolling.")
                 raise Exception("No job class elements found in page")
         except:
             raise Exception("No more jobs on this page")
@@ -141,6 +154,7 @@ class LinkedinEasyApply:
             try:
                 job_title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').text
                 link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]
+                print(f"Processing job: {job_title} at {link}")
             except:
                 pass
             try:
@@ -212,8 +226,12 @@ class LinkedinEasyApply:
             else:
                 print("Job contains blacklisted keyword or company or poster name!")
             self.seen_jobs += link
+        print("Finished applying for jobs in this batch.")
+
 
     def apply_to_job(self):
+        print("Applying to a specific job...")
+
         easy_apply_button = None
 
         try:
@@ -277,6 +295,7 @@ class LinkedinEasyApply:
         return True
 
     def home_address(self, element):
+        print("Filling in home address...")
         try:
             groups = element.find_elements(By.CLASS_NAME, 'jobs-easy-apply-form-section__grouping')
             if len(groups) > 0:
@@ -300,6 +319,7 @@ class LinkedinEasyApply:
             pass
 
     def get_answer(self, question):
+        print(f"Getting answer for question: {question}")
         if self.checkboxes[question]:
             return 'yes'
         else:
@@ -664,6 +684,7 @@ class LinkedinEasyApply:
                     pass
 
     def unfollow(self):
+        print("Unfollowing company...")
         try:
             follow_checkbox = self.browser.find_element(By.XPATH, "//label[contains(.,\'to stay up to date with their page.\')]").click()
             follow_checkbox.click()
@@ -671,6 +692,7 @@ class LinkedinEasyApply:
             pass
 
     def send_resume(self):
+        print("Sending resume...")
         try:
             file_upload_elements = (By.CSS_SELECTOR, "input[name='file']")
             if len(self.browser.find_elements(file_upload_elements[0], file_upload_elements[1])) > 0:
@@ -692,15 +714,18 @@ class LinkedinEasyApply:
 
 
     def enter_text(self, element, text):
+        print(f"Entering text: {text}")
         element.clear()
         element.send_keys(text)
 
     def select_dropdown(self, element, text):
+        print(f"Selecting dropdown option: {text}")
         select = Select(element)
         select.select_by_visible_text(text)
 
     # Radio Select
     def radio_select(self, element, label_text, clickLast=False):
+        print(f"Selecting radio option: {label_text}")
         label = element.find_element(By.TAG_NAME, 'label')
         if label_text in label.text.lower() or clickLast == True:
             label.click()
@@ -709,6 +734,7 @@ class LinkedinEasyApply:
 
     # Contact info fill-up
     def contact_info(self):
+        print("Filling in contact info...")
         frm_el = self.browser.find_elements(By.CLASS_NAME, 'jobs-easy-apply-form-section__grouping')
         if len(frm_el) > 0:
             for el in frm_el:
@@ -780,14 +806,14 @@ class LinkedinEasyApply:
             print("Could not write the unprepared question to the file! No special characters in the question is allowed: ")
             print(question_text)
 
-    def scroll_slow(self, scrollable_element, start=0, end=3600, step=100, reverse=False):
+    def scroll_slow(self, scrollable_element, start=0, end=3600, step=300, reverse=False):
         if reverse:
             start, end = end, start
             step = -step
 
         for i in range(start, end, step):
             self.browser.execute_script("arguments[0].scrollTo(0, {})".format(i), scrollable_element)
-            time.sleep(random.uniform(1.0, 2.6))
+            time.sleep(random.uniform(0.1, 0.5))
 
     def avoid_lock(self):
         if self.disable_lock:

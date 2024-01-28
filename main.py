@@ -6,6 +6,7 @@ from linkedineasyapply import LinkedinEasyApply
 from validate_email import validate_email
 
 def init_browser():
+    print("init_browser function called")
     browser_options = Options()
     options = ['--disable-blink-features', '--no-sandbox', '--start-maximized', '--disable-extensions',
                '--ignore-certificate-errors', '--disable-blink-features=AutomationControlled', '--remote-debugging-port=9222']
@@ -22,6 +23,7 @@ def init_browser():
 
 
 def validate_yaml():
+    print("validate_yaml function called")
     with open("config.yaml", 'r') as stream:
         try:
             parameters = yaml.safe_load(stream)
@@ -113,14 +115,15 @@ def validate_yaml():
 
 
 if __name__ == '__main__':
+    print("Main function called")
     parameters = validate_yaml()
     browser = init_browser()
 
+    print("Creating LinkedinEasyApply bot")
     bot = LinkedinEasyApply(parameters, browser)
+    print("Logging in")
     bot.login()
+    print("Performing security check")
     bot.security_check()
+    print("Starting application process")
     bot.start_applying()
-
-
-
-
