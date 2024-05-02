@@ -235,7 +235,7 @@ class LinkedinEasyApply:
         easy_apply_button = None
 
         try:
-            # Use XPath to select the button based on class presence and absence
+            # Use XPath to select the button based on class presence and absence - MJ
             easy_apply_button = self.browser.find_element(By.XPATH, "//button[contains(@class, 'jobs-apply-button') and contains(@class, 'artdeco-button') and contains(@class, 'artdeco-button--3') and contains(@class, 'artdeco-button--primary') and not(contains(@class, 'artdeco-button--icon-right'))]")
         except:
             return False
