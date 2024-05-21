@@ -693,26 +693,40 @@ class LinkedinEasyApply:
             pass
 
     def send_resume(self):
-        print("Sending resume...")
+        print("Starting send_resume method...")
         try:
+            print("Attempting to find file upload elements...")
             file_upload_elements = (By.CSS_SELECTOR, "input[name='file']")
-            if len(self.browser.find_elements(file_upload_elements[0], file_upload_elements[1])) > 0:
-                input_buttons = self.browser.find_elements(file_upload_elements[0], file_upload_elements[1])
+            elements_found = self.browser.find_elements(file_upload_elements[0], file_upload_elements[1])
+            print(f"Number of elements found: {len(elements_found)}")
+        
+            if len(elements_found) > 0:
+                input_buttons = elements_found
+                print(f"Number of input buttons found: {len(input_buttons)}")
+            
                 if len(input_buttons) == 0:
                     raise Exception("No input elements found in element")
+            
                 for upload_button in input_buttons:
-                    upload_type = upload_button.find_element(By.XPATH, "..").find_element(By.XPATH, "preceding-sibling::*")
+                    print("Inspecting an upload button...")
+                    upload_type = upload_button.find_element(By.XPATH, "..").find_element(By.CSS_SELECTOR, "jobs-document-upload__upload-button")
+                    print(f"Upload type text: {upload_type.text}")
+                    
                     if 'resume' in upload_type.text.lower():
+                        print("Uploading resume...")
                         upload_button.send_keys(self.resume_dir)
-                    elif 'cover' in upload_type.text.lower():
-                        if self.cover_letter_dir != '':
-                            upload_button.send_keys(self.cover_letter_dir)
-                        elif 'required' in upload_type.text.lower():
-                            upload_button.send_keys(self.resume_dir)
-        except:
-            print("Failed to upload resume or cover letter!")
-            pass
-
+                        print("Resume uploaded.")
+                    elif 'cover' in upload_type.text.lower() and self.cover_letter_dir != '':
+                        print("Found cover letter upload option.")
+                        print("Uploading cover letter...")
+                        upload_button.send_keys(self.cover_letter_dir)
+                        print("Cover letter uploaded.")
+                    elif 'required' in upload_type.text.lower():
+                        print("Uploading resume as required document...")
+                        upload_button.send_keys(self.resume_dir)
+                        print("Required document uploaded.")
+        except Exception as e:
+            print(f"Failed to upload resume or cover letter! Error: {e}")
 
     def enter_text(self, element, text):
         print(f"Entering text: {text}")
