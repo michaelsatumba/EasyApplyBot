@@ -6,10 +6,10 @@ from selenium.webdriver.support.ui import Select
 from datetime import date
 from itertools import product
 
-
 class LinkedinEasyApply:
     def __init__(self, parameters, driver):
         print("Initializing LinkedinEasyApply...")
+        self.applied_jobs_count = 0  # Initialize the counter
         self.browser = driver
         self.email = parameters['email']
         self.password = parameters['password']
@@ -40,7 +40,7 @@ class LinkedinEasyApply:
 
 
     def login(self):
-        print("Logging in...")
+        print("Logging in linkedineasyapply.py")
         try:
             self.browser.get("https://www.linkedin.com/login")
             time.sleep(random.uniform(5, 6))
@@ -228,7 +228,6 @@ class LinkedinEasyApply:
             self.seen_jobs += link
         print("Finished applying for jobs in this batch.")
 
-
     def apply_to_job(self):
         print("Applying to a specific job...")
 
@@ -293,6 +292,8 @@ class LinkedinEasyApply:
         if closed_notification is False:
             raise Exception("Could not close the applied confirmation window!")
 
+        self.applied_jobs_count += 1
+        print(f"Job application process completed successfully. {self.applied_jobs_count}")
         return True
 
     def home_address(self, element):
@@ -882,4 +883,3 @@ class LinkedinEasyApply:
                          "&keywords=" + position + location + "&start=" + str(job_page*25))
 
         self.avoid_lock()
-

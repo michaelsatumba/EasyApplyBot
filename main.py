@@ -121,7 +121,7 @@ if __name__ == '__main__':
 
     print("Creating LinkedinEasyApply bot")
     bot = LinkedinEasyApply(parameters, browser)
-    print("Logging in")
+    print("Logging in main.py")
     bot.login()
     print("Performing security check")
     bot.security_check()
